@@ -98,7 +98,7 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
                   ? AnimatedOpacity(
                       opacity: ref.watch(languageSwitcherVisibilityProvider) ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 300),
-                      child: FloatingActionButton(
+                    child: FloatingActionButton(
                         onPressed: () {
                           logInfo('FAB pressed: toggling search bar visibility');
                           ref.watch(searchBarVisibilityNotifier.notifier).toggleVisibility();
