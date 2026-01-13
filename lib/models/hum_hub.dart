@@ -207,7 +207,7 @@ class HumHub {
     );
     switch (GlobalPackageInfo.info.packageName) {
       // TODO RX1 bundle_id
-      case 'com.humhub.app':
+      case 'com.triunfante.app':
         return const OpenerApp();
       default:
         await dotenv.load(fileName: "assets/.env");
