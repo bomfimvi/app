@@ -102,3 +102,11 @@ flutter:
     - assets/images/locale/
     - assets/images/icons/
     - assets/animations/
+    
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/log.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#ffffff" # Opcional: define fundo branco caso a imagem não preencha tudo
+  adaptive_icon_foreground: "assets/log.png"
