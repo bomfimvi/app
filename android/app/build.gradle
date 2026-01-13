@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'com.humhub.app'
+    namespace 'com.triunfante.app'
     compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
