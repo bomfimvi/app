@@ -1,63 +1,63 @@
 {
-  "@@locale" : "en",
+  "@@locale" : "pt",
 
-  "opener_enter_url": "Enter your url and log in to your network.",
-  "opener_need_help": "Need Help?",
+  "opener_enter_url": "Insira sua URL e faça login na sua rede.",
+  "opener_need_help": "Precisa de ajuda?",
 
-  "help_title": "What is HumHub?",
-  "help_first_par": "HumHub is an Open Source software used by organizations, associations and companies mainly as social network, intranet or communication platform.",
-  "help_second_par": "The software digitizes organizational structures and helps people around the world to connect, communicate and facilitates daily collaboration. The HumHub App is intuitive to use and allows every user to access and browse their network from anywhere.",
-  "help_third_par": "The HumHub app is intuitive to use and allows you to access your network from anywhere. When notifications are enabled, you will also receive push notifications about important information within your network and can use the app to keep up to date with any relevant news at any time.",
-  "help_forth_par": "HumHub networks are basically private (internal to the organization) communication platforms. It is only possible to log into existing networks for which you have corresponding login data. Organizations or companies can of course set up and run their own HumHub network at any time. All information can be found at",
+  "help_title": "O que é HumHub?",
+  "help_first_par": "HumHub é um software de código aberto usado por organizações, associações e empresas principalmente como rede social, intranet ou plataforma de comunicação.",
+  "help_second_par": "O software digitaliza estruturas organizacionais e ajuda pessoas ao redor do mundo a se conectar, comunicar e facilitar a colaboração diária. O App HumHub é intuitivo e permite que cada usuário acesse e navegue em sua rede de qualquer lugar.",
+  "help_third_par": "O aplicativo é intuitivo e permite que você acesse sua rede de qualquer lugar. Quando as notificações estão ativadas, você também receberá alertas sobre informações importantes dentro da sua rede e poderá usar o app para se manter atualizado com notícias relevantes a qualquer momento.",
+  "help_forth_par": "As redes HumHub são basicamente plataformas de comunicação privadas (internas à organização). Só é possível entrar em redes existentes para as quais você tem dados de login correspondentes. Organizações ou empresas podem, claro, configurar e executar sua própria rede HumHub a qualquer momento. Todas as informações podem ser encontradas em",
 
 
-  "how_to_connect_title": "How can I connect my network?",
-  "how_to_connect_first_par": "There are many thousands of networks worldwide. Therefore, to log into your existing network, you need the exact URL of your individual network.",
-  "how_to_connect_sec_par": "Your URL can be found in the address bar of your browser in the login area of your network.",
-  "how_to_connect_third_par": "Please contact your administrator or network operator if you do not know your URL or login details.",
-  "how_to_connect_url_example": "example.humhub.com",
+  "how_to_connect_title": "Como posso conectar minha rede?",
+  "how_to_connect_first_par": "Existem milhares de redes em todo o mundo. Portanto, para fazer login na sua rede existente, você precisa da URL exata da sua rede individual.",
+  "how_to_connect_sec_par": "Sua URL pode ser encontrada na barra de endereços do seu navegador na área de login da sua rede.",
+  "how_to_connect_third_par": "Entre em contato com seu administrador ou operador de rede se você não souber sua URL ou detalhes de login.",
+  "how_to_connect_url_example": "exemplo.humhub.com",
 
-  "more_info_title": "What is HumHub?",
-  "more_info_first_par": "HumHub networks are basically closed communication platforms (internal to the organization). It is only possible to log into existing networks.",
-  "more_info_second_par": "Organizations or companies can of course set up and operate their own HumHub network at any time.",
-  "more_info_third_par": "All information can be found here:",
-  "more_info_pro_edition": "Visit HumHub.com",
+  "more_info_title": "O que é HumHub?",
+  "more_info_first_par": "As redes HumHub são basicamente plataformas de comunicação fechadas (internas à organização). Só é possível fazer login em redes existentes.",
+  "more_info_second_par": "Organizações ou empresas podem, claro, configurar e operar sua própria rede HumHub a qualquer momento.",
+  "more_info_third_par": "Todas as informações podem ser encontradas aqui:",
+  "more_info_pro_edition": "Visite HumHub.com",
 
-  "connectivity_popup_title": "No Internet Connection",
-  "connectivity_popup_content": "Please check your connection and try again",
+  "connectivity_popup_title": "Sem Conexão com a Internet",
+  "connectivity_popup_content": "Por favor, verifique sua conexão e tente novamente",
 
-  "web_view_exit_popup_title": "Are you sure?",
-  "web_view_exit_popup_content": "Do you want to exit an App?",
+  "web_view_exit_popup_title": "Tem certeza?",
+  "web_view_exit_popup_content": "Deseja sair do aplicativo?",
 
-  "file_download": "File downloaded",
-  "generic_error": "Oops! Something went wrong.",
+  "file_download": "Arquivo baixado",
+  "generic_error": "Ops! Algo deu errado.",
 
-  "enable_permissions": "Enable permissions.",
+  "enable_permissions": "Habilitar permissões.",
 
-  "add_network": "Add network",
+  "add_network": "Adicionar rede",
 
-  "downloading": "Downloading",
-  "settings": "Settings",
-  "connect": "Connect",
-  "open": "Open",
-  "cancel" : "Cancel",
-  "url": "url",
-  "back": "Back",
-  "next": "Next",
-  "connect_now": "Connect now",
-  "enable": "Enable",
-  "skip": "Skip",
-  "ok": "ok",
-  "no": "No",
-  "yes": "Yes",
+  "downloading": "Baixando",
+  "settings": "Configurações",
+  "connect": "Conectar",
+  "open": "Abrir",
+  "cancel" : "Cancelar",
+  "url": "URL",
+  "back": "Voltar",
+  "next": "Próximo",
+  "connect_now": "Conectar agora",
+  "enable": "Ativar",
+  "skip": "Pular",
+  "ok": "OK",
+  "no": "Não",
+  "yes": "Sim",
 
-  "error_404": "Your HumHub installation does not exist",
-  "error_no_connection": "Please check your internet connection.",
-  "error_url_empty": "Specify you HumHub location.",
+  "error_404": "Sua instalação HumHub não existe",
+  "error_no_connection": "Por favor, verifique sua conexão com a internet.",
+  "error_url_empty": "Especifique o local do seu HumHub.",
 
-  "sharing_not_supported": "Sharing files for this instance is not supported, contact admin",
-  "no_files_to_share": "No files found to share",
-  "files_too_big": "Files too big to share, limit is {limit}MB",
+  "sharing_not_supported": "O compartilhamento de arquivos não é suportado nesta instância, contate o administrador",
+  "no_files_to_share": "Nenhum arquivo encontrado para compartilhar",
+  "files_too_big": "Arquivos muito grandes para compartilhar, o limite é {limit}MB",
   "@files_too_big": {
     "placeholders": {
       "limit": {
@@ -65,9 +65,9 @@
       }
     }
   },
-  "no_files_uploaded": "No files were uploaded, contact admin for support",
-  "unexpected_error": "Unexpected error",
-  "file_type_not_supported": "File {filename} of type {fileType} is not supported",
+  "no_files_uploaded": "Nenhum arquivo foi enviado, contate o administrador para suporte",
+  "unexpected_error": "Erro inesperado",
+  "file_type_not_supported": "O arquivo {filename} do tipo {fileType} não é suportado",
   "@file_type_not_supported": {
     "placeholders": {
       "filename": {
@@ -78,22 +78,22 @@
       }
     }
   },
-  "file_sharing_error": "File sharing error",
-  "close": "Close",
+  "file_sharing_error": "Erro no compartilhamento de arquivo",
+  "close": "Fechar",
 
-  "language_en": "English",
-  "language_de": "German",
-  "language_fr": "French",
-  "language_saved": "The selected language is saved.",
+  "language_en": "Inglês",
+  "language_de": "Alemão",
+  "language_fr": "Francês",
+  "language_saved": "O idioma selecionado foi salvo.",
 
-  "data_sharing_title": "Help us improve the HumHub App",
-  "data_sharing_content": "To help us improve the app experience consider enabling the options below. This allows HumHub to receive anonymous error reports and basic device information, which helps us detect bugs faster, understand how the app performs in real conditions, and prioritize improvements.",
-  "data_sharing_error_reports_title": "Send anonymous error reports",
-  "data_sharing_error_reports_subtitle": "Includes crash logs and technical errors. No personal data is shared.",
-  "data_sharing_device_id_title": "Send device and session identifiers",
-  "data_sharing_device_id_subtitle": "Used to trace issues across devices and sessions. Helps reproduce bugs more accurately.",
-  "data_sharing_saved": "Your choice has been saved.",
+  "data_sharing_title": "Ajude-nos a melhorar o App LinkUP",
+  "data_sharing_content": "Para nos ajudar a melhorar a experiência do aplicativo, considere ativar as opções abaixo. Isso nos permite receber relatórios de erros anônimos e informações básicas do dispositivo, o que nos ajuda a detectar falhas mais rapidamente, entender o desempenho em condições reais e priorizar melhorias.",
+  "data_sharing_error_reports_title": "Enviar relatórios de erros anônimos",
+  "data_sharing_error_reports_subtitle": "Inclui logs de falhas e erros técnicos. Nenhum dado pessoal é compartilhado.",
+  "data_sharing_device_id_title": "Enviar identificadores de dispositivo",
+  "data_sharing_device_id_subtitle": "Usado para rastrear problemas entre dispositivos e sessões. Ajuda a reproduzir falhas com mais precisão.",
+  "data_sharing_saved": "Sua escolha foi salva com sucesso.",
 
-  "accept_all": "Accept all",
-  "decline_all": "Decline all"
+  "accept_all": "Aceitar tudo",
+  "decline_all": "Recusar tudo"
 }
