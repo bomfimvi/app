@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humhub/l10n/generated/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:humhub/pages/settings/settings.dart';
 import 'package:humhub/pages/web_view.dart';
@@ -8,8 +7,6 @@ import 'package:humhub/util/const.dart';
 import 'package:humhub/util/loading_provider.dart';
 import 'package:humhub/util/openers/opener_controller.dart';
 import 'package:humhub/util/openers/universal_opener_controller.dart';
-import 'package:humhub/util/providers.dart';
-import 'package:humhub/util/storage_service.dart';
 import 'package:loggy/loggy.dart';
 import 'package:rive/rive.dart' as rive;
 
@@ -28,22 +25,17 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
   void initState() {
     super.initState();
     openerControlLer = OpenerController(ref: ref);
-    // Inicia as animações do logo
     openerControlLer.setForwardAnimation(rive.SimpleAnimation('animation', autoplay: false));
     openerControlLer.setReverseAnimation(rive.SimpleAnimation('animation', autoplay: true));
   }
 
   // --- FUNÇÃO PARA ABRIR OS LINKS ---
   Future<void> _abrirLink(String url) async {
-    // Mostra carregando (opcional, depende da sua implementação de LoadingProvider)
-    // LoadingProvider.of(ref).showLoading(); 
-    
     UniversalOpenerController controller = UniversalOpenerController(url: url);
     try {
       await controller.initHumHub();
       if (mounted) {
         LoadingProvider.of(ref).dismissAll();
-        // Navega para o site
         Navigator.of(context).pushNamed(WebView.path, arguments: controller);
       }
     } catch (e) {
@@ -51,11 +43,57 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
       if (mounted) {
         LoadingProvider.of(ref).dismissAll();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao conectar: $e')),
-        );
+            SnackBar(content: Text('Erro de conexão. Verifique sua internet.')));
       }
     }
   }
+
+  // --- VISUAL DO NOVO BOTÃO ELEGANTE ---
+   Widget _buildMenuButton(BuildContext context, {required String label, required IconData icon, required VoidCallback onTap}) {
+    final primaryColor = Theme.of(context).primaryColor;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.15),
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4), // Sombra suave para baixo
+                ),
+              ],
+               border: Border.all(color: primaryColor.withOpacity(0.1), width: 1),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: primaryColor, size: 28),
+                const SizedBox(width: 15),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor, // Texto na cor do tema
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +101,7 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Fundo animado (Rive)
+          // Fundo animado
           rive.RiveAnimation.asset(
             Assets.openerAnimationForward,
             fit: BoxFit.fill,
@@ -75,85 +113,54 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
             controllers: [openerControlLer.animationReverseController],
           ),
           
-          // Conteúdo da Tela
           SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 1. Botão de Configurações (Canto superior direito)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: IconButton(
-                      icon: SvgPicture.asset(Assets.settings, width: 26, height: 26),
-                      onPressed: () => Navigator.of(context).pushNamed(SettingsPage.path),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Column(
+                children: [
+                  // Configurações
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: IconButton(
+                        icon: SvgPicture.asset(Assets.settings, width: 26, height: 26, colorFilter: ColorFilter.mode(Theme.of(context).primaryColor, BlendMode.srcIn)),
+                        onPressed: () => Navigator.of(context).pushNamed(SettingsPage.path),
+                      ),
                     ),
                   ),
-                ),
 
-                // 2. Logo (Centralizado)
-                Expanded(
-                  flex: 4,
-                  child: Center(
+                  const Spacer(flex: 1),
+
+                  // Logo Centralizado
+                  Center(
                     child: SizedBox(
-                      height: 120,
-                      width: 250,
+                      height: 130,
                       child: Image.asset(Assets.logo),
                     ),
                   ),
-                ),
 
-                // 3. SEUS DOIS BOTÕES NOVOS
-                Expanded(
-                  flex: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        
-                        // --- BOTÃO 1: DRIVE ---
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor, // Cor vermelha do tema
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () => _abrirLink("https://drivetriunfante.com.br"),
-                            child: const Text(
-                              "Acessar Drive",
-                              style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
+                  const SizedBox(height: 50), // Espaço entre logo e botões
 
-                        const SizedBox(height: 20),
-
-                        // --- BOTÃO 2: SOLICITAÇÕES ---
-                        SizedBox(
-                          width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[800], // Cinza escuro para diferenciar
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                            ),
-                            onPressed: () => _abrirLink("https://drivetriunfante.com.br/solicitacoes.php"),
-                            child: const Text(
-                              "Solicitações",
-                              style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  // --- NOVOS BOTÕES ELEGANTES ---
+                  _buildMenuButton(
+                    context,
+                    label: "Acessar Drive",
+                    icon: Icons.cloud_done_outlined, // Ícone de nuvem
+                    onTap: () => _abrirLink("https://drivetriunfante.com.br"),
                   ),
-                ),
-              ],
+
+                  _buildMenuButton(
+                    context,
+                    label: "Solicitações",
+                    icon: Icons.assignment_outlined, // Ícone de prancheta
+                    onTap: () => _abrirLink("https://drivetriunfante.com.br/solicitacoes.php"),
+                  ),
+                   // -----------------------------
+
+                  const Spacer(flex: 2),
+                ],
+              ),
             ),
           ),
         ],
