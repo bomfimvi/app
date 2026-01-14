@@ -57,7 +57,7 @@
     </queries>
 
     <application
-        android:label="LinkUP"
+        android:label="Triunfante"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:allowBackup="false"
