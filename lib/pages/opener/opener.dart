@@ -152,7 +152,7 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
 
                   _buildMenuButton(
                     context,
-                    label: "Solicitações",
+                    label: "LinkUP",
                     icon: Icons.assignment_outlined, // Ícone de prancheta
                     onTap: () => _abrirLink("https://drivetriunfante.com.br/solicitacoes.php"),
                   ),
