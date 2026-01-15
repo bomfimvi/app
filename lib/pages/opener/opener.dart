@@ -145,7 +145,7 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
                   // --- NOVOS BOTÕES ELEGANTES ---
                   _buildMenuButton(
                     context,
-                    label: "SIG-Sistema Integrado de Gestão",
+                    label: "SIG",
                     icon: Icons.cloud_done_outlined, // Ícone de nuvem
                     onTap: () => _abrirLink("https://drivetriunfante.com.br"),
                   ),
@@ -155,6 +155,14 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
                     label: "LinkUP",
                     icon: Icons.assignment_outlined, // Ícone de prancheta
                     onTap: () => _abrirLink("https://drivetriunfante.com.br/solicitacoes.php"),
+                  ),
+
+                  
+                  _buildMenuButton(
+                    context,
+                    label: "Lastmile",
+                    icon: Icons.assignment_outlined, // Ícone de prancheta
+                    onTap: () => _abrirLink("https://drivetriunfante-lastmile.com.br"),
                   ),
                    // -----------------------------
 
