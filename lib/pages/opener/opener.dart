@@ -145,7 +145,7 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
                   // --- NOVOS BOTÕES ELEGANTES ---
                   _buildMenuButton(
                     context,
-                    label: "Acessar Drive",
+                    label: "SIG-Sistema Integrado de Gestão",
                     icon: Icons.cloud_done_outlined, // Ícone de nuvem
                     onTap: () => _abrirLink("https://drivetriunfante.com.br"),
                   ),
