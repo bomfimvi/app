@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -108,6 +109,35 @@ class WebViewAppState extends ConsumerState<WebView> {
         }
       },
     );
+
+    // --- CONFIGURAÇÃO BLINDADA (GPS + UserAgent + JS) ---
+    final InAppWebViewSettings mySettings = InAppWebViewSettings(
+      useShouldOverrideUrlLoading: true,
+      useOnLoadResource: true,
+      useOnDownloadStart: true,
+      
+      // Essenciais para o LastMile
+      javaScriptEnabled: true,
+      domStorageEnabled: true,
+      databaseEnabled: true,
+      
+      // Habilita o GPS Explicitamente
+      geolocationEnabled: true, 
+      
+      safeBrowsingEnabled: false,
+      mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
+      allowFileAccessFromFileURLs: true,
+      allowUniversalAccessFromFileURLs: true,
+      mediaPlaybackRequiresUserGesture: false,
+      
+      cacheEnabled: false, 
+      clearCache: true,
+      supportZoom: false,
+
+      // Disfarce de Chrome
+      userAgent: "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36",
+    );
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: HexColor(_manifest.themeColor),
@@ -119,7 +149,10 @@ class WebViewAppState extends ConsumerState<WebView> {
           child: FileUploadManagerWidget(
             child: InAppWebView(
               initialUrlRequest: _initialRequest,
-              initialSettings: WebViewGlobalController.settings(),
+              
+              // APLICANDO AS CONFIGURAÇÕES
+              initialSettings: mySettings, 
+              
               pullToRefreshController: _pullToRefreshController,
               shouldOverrideUrlLoading: _shouldOverrideUrlLoading,
               onWebViewCreated: _onWebViewCreated,
@@ -131,11 +164,19 @@ class WebViewAppState extends ConsumerState<WebView> {
               onReceivedError: _onReceivedError,
               onDownloadStartRequest: _onDownloadStartRequest,
               onLongPressHitTestResult: WebViewGlobalController.onLongPressHitTestResult,
-              onReceivedHttpError: (controller, request, errorResponse) {
-                logError(errorResponse);
-              },
+              
+              // --- CORREÇÃO DE GPS E PERMISSÕES ---
               onPermissionRequest: (controller, request) async {
                 return PermissionResponse(resources: request.resources, action: PermissionResponseAction.GRANT);
+              },
+
+              // --- CORREÇÃO DE CERTIFICADO SSL ---
+              onReceivedServerTrustAuthRequest: (controller, challenge) async {
+                return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+              },
+              
+              onReceivedHttpError: (controller, request, errorResponse) {
+                logError(errorResponse);
               },
             ),
           ),
@@ -183,25 +224,33 @@ class WebViewAppState extends ConsumerState<WebView> {
 
     logDebug('Navigation attempt: ${action.request.url}');
 
-    /// First BLOCK everything that rules out as blocked.
     if (BlackListRules.check(url)) {
-      logInfo('Blocked navigation to $url by blacklist rules');
       return NavigationActionPolicy.CANCEL;
     }
+    
     // For SSO
     bool? isDomainTrusted = ref.read(humHubProvider).remoteConfig?.isTrustedDomain(action.request.url!.uriValue) ?? false;
     if ((!url.startsWith(_manifest.baseUrl) && action.isForMainFrame) && !isDomainTrusted) {
+      // PERMITIR LASTMILE
+      if (url.contains("lastmile") || url.contains("drivetriunfante")) {
+         return NavigationActionPolicy.ALLOW;
+      }
+
       logInfo('SSO detected, launching AuthInAppBrowser for $url');
       _authBrowser.launchUrl(action.request);
       return NavigationActionPolicy.CANCEL;
     }
     // For all other external links
     if (!url.startsWith(_manifest.baseUrl) && !action.isForMainFrame && action.navigationType == NavigationType.LINK_ACTIVATED) {
-      logInfo('External link detected, launching external application for $url');
+      // PERMITIR LASTMILE
+      if (url.contains("lastmile") || url.contains("drivetriunfante")) {
+         return NavigationActionPolicy.ALLOW;
+      }
+      
       await launchUrl(action.request.url!.uriValue, mode: LaunchMode.externalApplication);
       return NavigationActionPolicy.CANCEL;
     }
-    // 2nd Append customHeader if url is in app redirect and CANCEL the requests without custom headers
+    
     if (Platform.isAndroid || action.navigationType == NavigationType.LINK_ACTIVATED || action.navigationType == NavigationType.FORM_SUBMITTED) {
       Map<String, String> mergedMap = {...?_initialRequest.headers, ...?action.request.headers};
       URLRequest newRequest = action.request.copyWith(headers: mergedMap);
@@ -230,7 +279,6 @@ class WebViewAppState extends ConsumerState<WebView> {
   }
 
   Future<FetchRequest?> _shouldInterceptFetchRequest(InAppWebViewController controller, FetchRequest request) async {
-    logDebug("_shouldInterceptFetchRequest");
     request.headers?.addAll(_initialRequest.headers!);
     return request;
   }
@@ -257,7 +305,6 @@ class WebViewAppState extends ConsumerState<WebView> {
   }
 
   _onLoadStop(InAppWebViewController controller, Uri? url) async {
-    logDebug('Page load stopped: $url');
     if (url!.path.contains('/user/auth/login')) WebViewGlobalController.setLoginForm();
     WebViewGlobalController.ajaxSetHeaders(headers: ref.read(humHubProvider).customHeaders);
     WebViewGlobalController.listenToImageOpen();
@@ -268,7 +315,6 @@ class WebViewAppState extends ConsumerState<WebView> {
   }
 
   void _onLoadStart(InAppWebViewController controller, Uri? url) async {
-    logDebug('Page load started: $url');
     WebViewGlobalController.ajaxSetHeaders(headers: ref.read(humHubProvider).customHeaders);
     WebViewGlobalController.listenToImageOpen();
     WebViewGlobalController.appendViewportFitCover();
@@ -283,8 +329,8 @@ class WebViewAppState extends ConsumerState<WebView> {
   }
 
   void _onReceivedError(InAppWebViewController controller, WebResourceRequest request, WebResourceError error) {
+    logWarning('WebView Error: ${error.description}');
     if ([WebResourceErrorType.NOT_CONNECTED_TO_INTERNET, WebResourceErrorType.TIMEOUT].contains(error.type)) {
-      logWarning('No internet connection detected');
       LoadingProvider.of(ref).dismissAll();
     }
   }
@@ -297,19 +343,14 @@ class WebViewAppState extends ConsumerState<WebView> {
   Future<void> _handleJSMessage(ChannelMessage message, HeadlessInAppWebView headlessWebView) async {
     switch (message.action) {
       case ChannelAction.showOpener:
-        logInfo('Action: showOpener');
         ref.read(humHubProvider).setOpenerState(OpenerState.shown);
         Navigator.of(context).pushNamedAndRemoveUntil(OpenerPage.path, (Route<dynamic> route) => false);
         break;
       case ChannelAction.hideOpener:
-        logInfo('Action: hideOpener');
         ref.read(humHubProvider).setOpenerState(OpenerState.hidden);
-        ref.read(humHubProvider).setHash(
-              Crypt.generateRandomString(32),
-            );
+        ref.read(humHubProvider).setHash(Crypt.generateRandomString(32));
         break;
       case ChannelAction.registerFcmDevice:
-        logInfo('Action: registerFcmDevice');
         String? token = ref.read(pushTokenProvider).value ?? await FirebaseMessaging.instance.getTokenSafe();
         if (token != null) {
           WebViewGlobalController.ajaxPost(
@@ -320,16 +361,13 @@ class WebViewAppState extends ConsumerState<WebView> {
         }
         break;
       case ChannelAction.updateNotificationCount:
-        logInfo('Action: updateNotificationCount');
         UpdateNotificationCountChannelData data = message.data as UpdateNotificationCountChannelData;
         AppBadgePlus.updateBadge(data.count);
         break;
       case ChannelAction.nativeConsole:
-        logInfo('Action: nativeConsole');
         Navigator.of(context).pushNamed(ConsolePage.routeName);
         break;
       case ChannelAction.unregisterFcmDevice:
-        logInfo('Action: unregisterFcmDevice');
         String? token = ref.read(pushTokenProvider).value ?? await FirebaseMessaging.instance.getTokenSafe();
         if (token != null) {
           WebViewGlobalController.ajaxPost(
@@ -340,7 +378,6 @@ class WebViewAppState extends ConsumerState<WebView> {
         }
         break;
       case ChannelAction.fileUploadSettings:
-        logInfo('Action: fileUploadSettings');
         FileUploadSettingsChannelData data = message.data as FileUploadSettingsChannelData;
         ref.read(humHubProvider.notifier).setFileUploadSettings(data.settings);
         FileUploadManager(
@@ -351,20 +388,16 @@ class WebViewAppState extends ConsumerState<WebView> {
             .upload();
         break;
       case ChannelAction.none:
-        logInfo('Action: none');
         break;
     }
   }
 
   Future<bool> exitApp(BuildContext context, WidgetRef ref) async {
-    logInfo('Attempting to exit app');
     bool canGoBack = await WebViewGlobalController.value!.canGoBack();
     if (canGoBack) {
-      logDebug('WebView can go back, navigating back');
       WebViewGlobalController.value!.goBack();
       return Future.value(false);
     } else {
-      logDebug('Showing exit confirmation dialog');
       bool? exitConfirmed;
       if (context.mounted) {
         exitConfirmed = await showDialog<bool>(
@@ -395,13 +428,8 @@ class WebViewAppState extends ConsumerState<WebView> {
   }
 
   void _onDownloadStartRequest(InAppWebViewController controller, DownloadStartRequest downloadStartRequest) async {
-    logInfo('Download started: ${downloadStartRequest.url}');
     PersistentBottomSheetController? persistentController;
-
-    // Initialize the download progress
     double downloadProgress = 0;
-
-    // Timer to control when to show the bottom sheet
     Timer? downloadTimer;
     bool isDone = false;
 
@@ -409,9 +437,7 @@ class WebViewAppState extends ConsumerState<WebView> {
       downloadStartRequest: downloadStartRequest,
       controller: controller,
       onSuccess: (File file, String filename) async {
-        // Hide the bottom sheet if it is visible
         Navigator.popUntil(context, ModalRoute.withName(WebView.path));
-        logInfo('Download succeeded: $filename at ${file.path}');
         isDone = true;
         Keys.scaffoldMessengerStateKey.currentState?.showSnackBar(
           SnackBar(
@@ -419,7 +445,6 @@ class WebViewAppState extends ConsumerState<WebView> {
             action: SnackBarAction(
               label: AppLocalizations.of(context)!.open,
               onPressed: () {
-                //file.open();
                 OpenFile.open(file.path);
               },
             ),
@@ -428,9 +453,7 @@ class WebViewAppState extends ConsumerState<WebView> {
       },
       onStart: () async {
         downloadProgress = 0;
-        // Start the timer for 1 second
         downloadTimer = Timer(const Duration(seconds: 1), () {
-          // Show the persistent bottom sheet if not already shown
           if (!isDone) {
             persistentController = _scaffoldKey.currentState!.showBottomSheet((context) {
               return Container(
@@ -455,18 +478,8 @@ class WebViewAppState extends ConsumerState<WebView> {
                             color: Colors.green,
                           ),
                           downloadProgress.toStringAsFixed(0) == "100"
-                              ? const Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 25,
-                                )
-                              : Text(
-                                  downloadProgress.toStringAsFixed(0),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                              ? const Icon(Icons.check, color: Colors.green, size: 25)
+                              : Text(downloadProgress.toStringAsFixed(0), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
                       ),
                     ],
@@ -484,7 +497,6 @@ class WebViewAppState extends ConsumerState<WebView> {
         }
       },
       onError: (er) {
-        logError('Download failed: $er');
         downloadTimer?.cancel();
         if (persistentController != null) {
           Navigator.popUntil(context, ModalRoute.withName(WebView.path));
@@ -497,7 +509,6 @@ class WebViewAppState extends ConsumerState<WebView> {
       },
     ).download();
 
-    // Ensure to cancel the timer if download finishes before 1 second
     Future.delayed(const Duration(seconds: 1), () {
       if (downloadProgress >= 100) {
         downloadTimer?.cancel();
@@ -507,7 +518,6 @@ class WebViewAppState extends ConsumerState<WebView> {
 
   @override
   void dispose() {
-    logInfo('Disposing WebView and controllers');
     if (_headlessWebView != null) _headlessWebView!.dispose();
     _subscription?.cancel();
     _keyboardSubscription?.cancel();
