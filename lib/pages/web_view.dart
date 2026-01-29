@@ -110,19 +110,17 @@ class WebViewAppState extends ConsumerState<WebView> {
       },
     );
 
-    // --- CONFIGURAÇÃO BLINDADA (GPS + UserAgent + JS) ---
+    // --- CONFIGURAÇÕES DO NAVEGADOR ---
     final InAppWebViewSettings mySettings = InAppWebViewSettings(
       useShouldOverrideUrlLoading: true,
       useOnLoadResource: true,
       useOnDownloadStart: true,
       
-      // Essenciais para o LastMile
+      // Permissões Críticas para o LinkUP
       javaScriptEnabled: true,
       domStorageEnabled: true,
       databaseEnabled: true,
-      
-      // Habilita o GPS Explicitamente
-      geolocationEnabled: true, 
+      geolocationEnabled: true, // <--- LIGA O GPS
       
       safeBrowsingEnabled: false,
       mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
@@ -134,7 +132,6 @@ class WebViewAppState extends ConsumerState<WebView> {
       clearCache: true,
       supportZoom: false,
 
-      // Disfarce de Chrome
       userAgent: "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36",
     );
 
@@ -149,10 +146,7 @@ class WebViewAppState extends ConsumerState<WebView> {
           child: FileUploadManagerWidget(
             child: InAppWebView(
               initialUrlRequest: _initialRequest,
-              
-              // APLICANDO AS CONFIGURAÇÕES
               initialSettings: mySettings, 
-              
               pullToRefreshController: _pullToRefreshController,
               shouldOverrideUrlLoading: _shouldOverrideUrlLoading,
               onWebViewCreated: _onWebViewCreated,
@@ -165,12 +159,18 @@ class WebViewAppState extends ConsumerState<WebView> {
               onDownloadStartRequest: _onDownloadStartRequest,
               onLongPressHitTestResult: WebViewGlobalController.onLongPressHitTestResult,
               
-              // --- CORREÇÃO DE GPS E PERMISSÕES ---
+              // --- ESSA É A PARTE QUE FALTAVA PARA O LINKUP ---
+              // Quando o site LinkUP pede GPS, o Android pergunta aqui: "Posso dar?"
+              // A gente responde: "Sim (allow: true) e lembre disso (retain: true)"
+              onGeolocationPermissionsShowPrompt: (controller, origin) async {
+                return GeolocationPermissionShowPromptResponse(origin: origin, allow: true, retain: true);
+              },
+              // ------------------------------------------------
+
               onPermissionRequest: (controller, request) async {
                 return PermissionResponse(resources: request.resources, action: PermissionResponseAction.GRANT);
               },
 
-              // --- CORREÇÃO DE CERTIFICADO SSL ---
               onReceivedServerTrustAuthRequest: (controller, challenge) async {
                 return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
               },
@@ -231,22 +231,18 @@ class WebViewAppState extends ConsumerState<WebView> {
     // For SSO
     bool? isDomainTrusted = ref.read(humHubProvider).remoteConfig?.isTrustedDomain(action.request.url!.uriValue) ?? false;
     if ((!url.startsWith(_manifest.baseUrl) && action.isForMainFrame) && !isDomainTrusted) {
-      // PERMITIR LASTMILE
       if (url.contains("lastmile") || url.contains("drivetriunfante")) {
          return NavigationActionPolicy.ALLOW;
       }
-
       logInfo('SSO detected, launching AuthInAppBrowser for $url');
       _authBrowser.launchUrl(action.request);
       return NavigationActionPolicy.CANCEL;
     }
-    // For all other external links
+    
     if (!url.startsWith(_manifest.baseUrl) && !action.isForMainFrame && action.navigationType == NavigationType.LINK_ACTIVATED) {
-      // PERMITIR LASTMILE
       if (url.contains("lastmile") || url.contains("drivetriunfante")) {
          return NavigationActionPolicy.ALLOW;
       }
-      
       await launchUrl(action.request.url!.uriValue, mode: LaunchMode.externalApplication);
       return NavigationActionPolicy.CANCEL;
     }
@@ -262,6 +258,10 @@ class WebViewAppState extends ConsumerState<WebView> {
 
   _onWebViewCreated(InAppWebViewController controller) async {
     LoadingProvider.of(ref).showLoading();
+    
+    // Limpa cache para evitar bugs de permissão antiga
+    await controller.clearCache();
+
     _headlessWebView = HeadlessInAppWebView();
     _headlessWebView!.run();
     await controller.addWebMessageListener(
