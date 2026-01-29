@@ -169,13 +169,13 @@ class OpenerPageState extends ConsumerState<OpenerPage>
                       onTap: () => _abrirLink(
                           "https://drivetriunfante.com.br/solicitacoes.php"),
                     ),
-                //    _buildMenuButton(
-              ///       context,
-              //        label: "Lastmile",
-              //        icon: Icons.assignment_outlined,
-              //        onTap: () => _abrirLink(
-              //            "https://drivetriunfante-lastmile.com.br"),
-               //     ),
+                    _buildMenuButton(
+                     context,
+                      label: "Lastmile",
+                      icon: Icons.assignment_outlined,
+                     onTap: () => _abrirLink(
+                          "https://drivetriunfante-lastmile.com.br"),
+                    ),
                   const Spacer(flex: 2),
                 ],
               ),
