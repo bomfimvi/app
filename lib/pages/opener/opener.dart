@@ -18,38 +18,46 @@ class OpenerPage extends ConsumerStatefulWidget {
   OpenerPageState createState() => OpenerPageState();
 }
 
-class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProviderStateMixin {
+class OpenerPageState extends ConsumerState<OpenerPage>
+    with SingleTickerProviderStateMixin {
   late OpenerController openerControlLer;
 
   @override
   void initState() {
     super.initState();
     openerControlLer = OpenerController(ref: ref);
-    openerControlLer.setForwardAnimation(rive.SimpleAnimation('animation', autoplay: false));
-    openerControlLer.setReverseAnimation(rive.SimpleAnimation('animation', autoplay: true));
+    openerControlLer.setForwardAnimation(
+        rive.SimpleAnimation('animation', autoplay: false));
+    openerControlLer.setReverseAnimation(
+        rive.SimpleAnimation('animation', autoplay: true));
   }
 
   // --- FUNÇÃO PARA ABRIR OS LINKS ---
   Future<void> _abrirLink(String url) async {
-    UniversalOpenerController controller = UniversalOpenerController(url: url);
+    final controller = UniversalOpenerController(url: url);
     try {
       await controller.initHumHub();
       if (mounted) {
         LoadingProvider.of(ref).dismissAll();
-        Navigator.of(context).pushNamed(WebView.path, arguments: controller);
+        Navigator.of(context)
+            .pushNamed(WebView.path, arguments: controller);
       }
     } catch (e) {
       logError('Erro ao conectar: $e');
       if (mounted) {
+        // Oculta qualquer carregamento pendente
         LoadingProvider.of(ref).dismissAll();
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro de conexão. Verifique sua internet.')));
+        // Removemos o SnackBar aqui para não exibir mensagem de “sem internet”.
+        // Se desejar adicionar outro comportamento, faça-o neste ponto.
       }
     }
   }
 
   // --- VISUAL DO NOVO BOTÃO ELEGANTE ---
-   Widget _buildMenuButton(BuildContext context, {required String label, required IconData icon, required VoidCallback onTap}) {
+  Widget _buildMenuButton(BuildContext context,
+      {required String label,
+      required IconData icon,
+      required VoidCallback onTap}) {
     final primaryColor = Theme.of(context).primaryColor;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -59,7 +67,8 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Ink(
-            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+            padding:
+                const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -71,7 +80,8 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
                   offset: const Offset(0, 4), // Sombra suave para baixo
                 ),
               ],
-               border: Border.all(color: primaryColor.withOpacity(0.1), width: 1),
+              border: Border.all(
+                  color: primaryColor.withOpacity(0.1), width: 1),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +104,6 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,60 +121,61 @@ class OpenerPageState extends ConsumerState<OpenerPage> with SingleTickerProvide
             fit: BoxFit.fill,
             controllers: [openerControlLer.animationReverseController],
           ),
-          
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: Column(
                 children: [
-                  // Configurações
+                  // Botão de configurações
                   Align(
                     alignment: Alignment.topRight,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 16.0),
                       child: IconButton(
-                        icon: SvgPicture.asset(Assets.settings, width: 26, height: 26, colorFilter: ColorFilter.mode(Theme.of(context).primaryColor, BlendMode.srcIn)),
-                        onPressed: () => Navigator.of(context).pushNamed(SettingsPage.path),
+                        icon: SvgPicture.asset(Assets.settings,
+                            width: 26,
+                            height: 26,
+                            colorFilter: ColorFilter.mode(
+                                Theme.of(context).primaryColor,
+                                BlendMode.srcIn)),
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed(
+                                SettingsPage.path),
                       ),
                     ),
                   ),
-
                   const Spacer(flex: 1),
-
-                  // Logo Centralizado
+                  // Logo centralizado
                   Center(
                     child: SizedBox(
                       height: 130,
                       child: Image.asset(Assets.logo),
                     ),
                   ),
-
-                  const SizedBox(height: 50), // Espaço entre logo e botões
-
-                  // --- NOVOS BOTÕES ELEGANTES ---
-                  _buildMenuButton(
-                    context,
-                    label: "SIG",
-                    icon: Icons.cloud_done_outlined, // Ícone de nuvem
-                    onTap: () => _abrirLink("https://drivetriunfante.com.br"),
-                  ),
-
-                  _buildMenuButton(
-                    context,
-                    label: "LinkUP",
-                    icon: Icons.assignment_outlined, // Ícone de prancheta
-                    onTap: () => _abrirLink("https://drivetriunfante.com.br/solicitacoes.php"),
-                  ),
-
-                  
-                  _buildMenuButton(
-                    context,
-                    label: "Lastmile",
-                    icon: Icons.assignment_outlined, // Ícone de prancheta
-                    onTap: () => _abrirLink("https://drivetriunfante-lastmile.com.br"),
-                  ),
-                   // -----------------------------
-
+                  const SizedBox(height: 50),
+                  // Botões de menu
+                    _buildMenuButton(
+                      context,
+                      label: "SIG",
+                      icon: Icons.cloud_done_outlined,
+                      onTap: () =>
+                          _abrirLink("https://drivetriunfante.com.br"),
+                    ),
+                    _buildMenuButton(
+                      context,
+                      label: "LinkUP",
+                      icon: Icons.assignment_outlined,
+                      onTap: () => _abrirLink(
+                          "https://drivetriunfante.com.br/solicitacoes.php"),
+                    ),
+                //    _buildMenuButton(
+              ///       context,
+              //        label: "Lastmile",
+              //        icon: Icons.assignment_outlined,
+              //        onTap: () => _abrirLink(
+              //            "https://drivetriunfante-lastmile.com.br"),
+               //     ),
                   const Spacer(flex: 2),
                 ],
               ),
